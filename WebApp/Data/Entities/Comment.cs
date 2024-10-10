@@ -7,4 +7,9 @@ public class Comment
     public DateTimeOffset CreatedOn { get; set; }
     
     public Review Review { get; set; }
+
+    public CommentDto ToDto()
+    {
+        return new CommentDto(Id, Text, CreatedOn);
+    }
 }

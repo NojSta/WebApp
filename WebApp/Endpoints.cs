@@ -111,8 +111,14 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Reviews");
 
-        reviewsGroups.MapPost("/reviews", async (int destinationId, CreateReviewDto dto, SystemDbContext dbContext) =>
-        {
+        reviewsGroups.MapPost("/reviews", async (int destinationId, CreateReviewDto dto, SystemDbContext dbContext) => 
+            {
+            var destination = await dbContext.Destinations.FindAsync(destinationId);
+            
+            if (destination == null)
+            {
+                return Results.NotFound();
+            }
             var review = new Review
             {
                 Title = dto.Title,
@@ -120,7 +126,7 @@ public static class Endpoints
                 Rating = 0,
                 LikesCount = 0,
                 CreatedOn = DateTimeOffset.UtcNow,
-                Destination = await dbContext.Destinations.FindAsync(destinationId)
+                Destination = destination
             };
             
             dbContext.Reviews.Add(review);

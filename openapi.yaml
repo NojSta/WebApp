@@ -5,6 +5,7 @@ info:
 paths:
   /api/destinations/{destinationId}/reviews/{reviewId}/comments:
     get:
+      summary: Get a list of comments
       tags:
         - Comments
       operationId: GetComments
@@ -23,7 +24,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Success
+          description: A list of comments
           content:
             application/json:
               schema:
@@ -31,6 +32,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/CommentDto'
     post:
+      summary: Post a comment
       tags:
         - Comments
       operationId: CreateComment
@@ -55,27 +57,20 @@ paths:
         required: true
       responses:
         '201':
-          description: Created
+          description: A comment
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentDto'
         '400':
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: string
         '404':
-          description: Not Found
+          description: Comment Not Found
         '422':
-          description: Client Error
-          content:
-            application/json:
-              schema:
-                type: string
+          description: Unprocessable Content
   /api/destinations/{destinationId}/reviews/{reviewId}/comments/{commentId}:
     get:
+      summary: Get a comment by ID
       tags:
         - Comments
       operationId: GetCommentById
@@ -100,14 +95,15 @@ paths:
             format: int32
       responses:
         '200':
-          description: Success
+          description: A comment
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentDto'
         '404':
-          description: Not Found
+          description: Comment Not Found
     delete:
+      summary: Delete a comment by ID
       tags:
         - Comments
       operationId: DeleteComment
@@ -132,11 +128,12 @@ paths:
             format: int32
       responses:
         '204':
-          description: No Content
+          description: Comment deleted
         '404':
-          description: Not Found
+          description: Comment Not Found
   /api/destinations/{destinationId}/reviews/{reviewId}/comments/{commentID}:
     put:
+      summary: Update a comment by ID
       tags:
         - Comments
       operationId: UpdateComment
@@ -167,33 +164,26 @@ paths:
         required: true
       responses:
         '200':
-          description: Success
+          description: A comment
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentDto'
         '400':
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: string
         '404':
-          description: Not Found
+          description: Comment Not Found
         '422':
-          description: Client Error
-          content:
-            application/json:
-              schema:
-                type: string
+          description: Unprocessable Content
   /api/destinations:
     get:
+      summary: Get a list of destinations
       tags:
         - Destinations
       operationId: GetDestinations
       responses:
         '200':
-          description: Success
+          description: A list of destinations
           content:
             application/json:
               schema:
@@ -201,6 +191,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/DestinationDto'
     post:
+      summary: Create a destination
       tags:
         - Destinations
       operationId: CreateDestinations
@@ -212,27 +203,20 @@ paths:
         required: true
       responses:
         '201':
-          description: Created
+          description: A destination
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DestinationDto'
         '400':
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: string
         '404':
-          description: Not Found
+          description: Destination Not Found
         '422':
-          description: Client Error
-          content:
-            application/json:
-              schema:
-                type: string
+          description: Unprocessable Content
   /api/destinations/{destinationId}:
     get:
+      summary: Get a destination by ID
       tags:
         - Destinations
       operationId: GetDestinationById
@@ -245,14 +229,15 @@ paths:
             format: int32
       responses:
         '200':
-          description: Success
+          description: A destination
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DestinationDto'
         '404':
-          description: Not Found
+          description: Destination Not Found
     delete:
+      summary: Delete a destination by ID
       tags:
         - Destinations
       operationId: DeleteDestination
@@ -265,11 +250,12 @@ paths:
             format: int32
       responses:
         '204':
-          description: No Content
+          description: Destination deleted
         '404':
-          description: Not Found
+          description: Destination Not Found
   /api/destinations/{destinationID}:
     put:
+      summary: Update a destination by ID
       tags:
         - Destinations
       operationId: UpdateDestination
@@ -288,27 +274,20 @@ paths:
         required: true
       responses:
         '200':
-          description: Success
+          description: A destination
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DestinationDto'
         '400':
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: string
         '404':
-          description: Not Found
+          description: Destination Not Found
         '422':
-          description: Client Error
-          content:
-            application/json:
-              schema:
-                type: string
+          description: Unprocessable Content
   /api/destinations/{destinationId}/reviews:
     get:
+      summary: Get a list of reviews
       tags:
         - Reviews
       operationId: GetReviews
@@ -321,7 +300,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Success
+          description: A list of reviews
           content:
             application/json:
               schema:
@@ -329,6 +308,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/ReviewDto'
     post:
+      summary: Create a new review
       tags:
         - Reviews
       operationId: CreateReview
@@ -347,27 +327,20 @@ paths:
         required: true
       responses:
         '201':
-          description: Created
+          description: A review
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReviewDto'
         '400':
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: string
         '404':
-          description: Not Found
+          description: Review Not Found
         '422':
-          description: Client Error
-          content:
-            application/json:
-              schema:
-                type: string
+          description: Unprocessable Content
   /api/destinations/{destinationId}/reviews/{reviewId}:
     get:
+      summary: Get a review by ID
       tags:
         - Reviews
       operationId: GetReviewById
@@ -386,14 +359,15 @@ paths:
             format: int32
       responses:
         '200':
-          description: Success
+          description: A review
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReviewDto'
         '404':
-          description: Not Found
+          description: Review Not Found
     delete:
+      summary: Delete a review by ID
       tags:
         - Reviews
       operationId: DeleteReview
@@ -412,11 +386,12 @@ paths:
             format: int32
       responses:
         '204':
-          description: No Content
+          description: Review deleted
         '404':
-          description: Not Found
+          description: Review Not Found
   /api/destinations/{destinationId}/reviews/{reviewID}:
     put:
+      summary: Update a review by ID
       tags:
         - Reviews
       operationId: UpdateReview
@@ -441,25 +416,17 @@ paths:
         required: true
       responses:
         '200':
-          description: Success
+          description: A review
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReviewDto'
         '400':
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: string
         '404':
-          description: Not Found
+          description: Review Not Found
         '422':
-          description: Client Error
-          content:
-            application/json:
-              schema:
-                type: string
+          description: Unprocessable Content
 components:
   schemas:
     CommentDto:
@@ -468,12 +435,15 @@ components:
         id:
           type: integer
           format: int32
+          example: 2
         text:
           type: string
           nullable: true
+          example: Good review!
         createdAt:
           type: string
           format: date-time
+          example: 2024.10.10
       additionalProperties: false
     CreateCommentDto:
       type: object
@@ -481,6 +451,7 @@ components:
         text:
           type: string
           nullable: true
+          example: Nice experience
       additionalProperties: false
     CreateDestinationDto:
       type: object
@@ -488,9 +459,11 @@ components:
         name:
           type: string
           nullable: true
+          example: Rekyva
         content:
           type: string
           nullable: true
+          example: Grazu
       additionalProperties: false
     CreateReviewDto:
       type: object
@@ -498,9 +471,11 @@ components:
         title:
           type: string
           nullable: true
+          example: Long journey
         content:
           type: string
           nullable: true
+          example: Enjoyed it
       additionalProperties: false
     DestinationDto:
       type: object
@@ -508,12 +483,15 @@ components:
         id:
           type: integer
           format: int32
+          example: 1
         name:
           type: string
           nullable: true
+          example: Everest
         content:
           type: string
           nullable: true
+          example: Big mountain
       additionalProperties: false
     ReviewDto:
       type: object
@@ -521,21 +499,27 @@ components:
         id:
           type: integer
           format: int32
+          example: 1
         name:
           type: string
           nullable: true
+          example: Been there
         content:
           type: string
           nullable: true
+          example: Really liked it
         likes:
           type: integer
           format: int32
+          example: 2
         rating:
           type: integer
           format: int32
+          example: 2
         createdAt:
           type: string
           format: date-time
+          example: 2024.10.11
       additionalProperties: false
     UpdateCommentDto:
       type: object
@@ -543,6 +527,7 @@ components:
         text:
           type: string
           nullable: true
+          example: Very nice review
       additionalProperties: false
     UpdateDestinationDto:
       type: object
@@ -550,6 +535,7 @@ components:
         content:
           type: string
           nullable: true
+          example: Very big mountain
       additionalProperties: false
     UpdateReviewDto:
       type: object
@@ -557,7 +543,9 @@ components:
         title:
           type: string
           nullable: true
+          example: Been there
         content:
           type: string
           nullable: true
+          example: Really really liked it
       additionalProperties: false

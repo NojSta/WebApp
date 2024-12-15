@@ -1,11 +1,20 @@
+using System.Reflection;
+using System.Text;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Results;
 using SharpGrip.FluentValidation.AutoValidation.Shared.Extensions;
 using WebApp;
+using WebApp.Auth;
+using WebApp.Auth.Model;
 using WebApp.Data;
 using WebApp.Data.Entities;
 
@@ -17,15 +26,48 @@ builder.Services.AddFluentValidationAutoValidation(configuration =>
     configuration.OverrideDefaultResultFactoryWith<ProblemDetailsResultFactory>();
 });
 
-// Add services for Swagger/OpenAPI
+builder.Services.AddTransient<JwtTokenService>();
+builder.Services.AddTransient<SessionService>();
+builder.Services.AddScoped<AuthSeeder>();
+
+builder.Services.AddIdentity<ForumUser, IdentityRole>()
+    .AddEntityFrameworkStores<SystemDbContext>()
+    .AddDefaultTokenProviders();
+  
+builder.Services.AddAuthentication( options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.MapInboundClaims = false;
+    options.TokenValidationParameters.ValidAudience = builder.Configuration["Jwt:ValidAudience"];
+    options.TokenValidationParameters.ValidIssuer = builder.Configuration["Jwt:ValidIssuer"];
+    options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]));
+});
+
+builder.Services.AddAuthorization();
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Destinations API", Version = "v1" });
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
 var app = builder.Build();
 
+using var scope = app.Services.CreateScope();
+
+//var dbContext = scope.ServiceProvider.GetRequiredService<SystemDbContext>();
+
+var dbSeeder = scope.ServiceProvider.GetRequiredService<AuthSeeder>();
+await dbSeeder.SeedAsync();
+
+app.AddAuthApi();
 // Enable middleware to serve generated Swagger as a JSON endpoint
 app.UseSwagger();
 
@@ -38,6 +80,8 @@ app.UseSwaggerUI(c =>
 app.AddDestinationApi(); 
 app.AddReviewApi();
 app.AddCommentApi();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
 
@@ -55,9 +99,31 @@ public class ProblemDetailsResultFactory : IFluentValidationAutoValidationResult
     }
 }
 
-public record DestinationDto(int Id, string Name, string Content);
-public record CreateDestinationDto(string Name, string Content)
+public class DestinationDto
 {
+    /// <example>1</example>
+    public int Id { get; set; }
+
+    /// <example>Everest</example>
+    public string Name { get; set; }
+
+    /// <example>Big mountain</example>
+    public string Content { get; set; }
+
+    public DestinationDto(int Id, string Name, string Content)
+    {
+        this.Id = Id;
+        this.Name = Name;
+        this.Content = Content;
+    }
+}
+
+public class CreateDestinationDto
+{
+    /// <example>Rekyva</example>
+    public string Name {get; set;}
+    /// <example>Grazu</example>
+    public string Content {get; set;}
     public class CreateDestinationDtoValidator : AbstractValidator<CreateDestinationDto>
     {
         public CreateDestinationDtoValidator()
@@ -67,10 +133,44 @@ public record CreateDestinationDto(string Name, string Content)
         }
     }
 };
-public record UpdateDestinationDto(string Content);
 
-public record ReviewDto(int Id, string Name, string Content, int Likes, int Rating, DateTimeOffset CreatedAt);
-public record CreateReviewDto(string Title, string Content)
+public class UpdateDestinationDto
+{
+    /// <example>Very big mountain</example>
+    public string Content {get; set;}
+    [JsonConstructor]
+    UpdateDestinationDto(string content)
+    {
+        this.Content = content;
+    }
+};
+
+public class ReviewDto
+{
+    /// <example>1</example>
+    public int Id { get; set; }
+    /// <example>Been there</example>
+    public string Name { get; set; }
+    /// <example>Really liked it</example>
+    public string Content { get; set;}
+    /// <example>2</example>
+    public int Likes { get; set; }
+    /// <example>2</example>
+    public int Rating { get; set; }
+    /// <example>2024.10.11</example>
+    public DateTimeOffset CreatedAt { get; set; }
+
+    public ReviewDto(int id, string name, string content, int likes, int rating, DateTimeOffset createdAt)
+    {
+        this.Id = id;
+        this.Name = name;
+        this.Content = content;
+        this.Likes = likes;
+        this.Rating = rating;
+        this.CreatedAt = createdAt;
+    }
+};
+public class CreateReviewDto
 {
     public class CreateReviewDtoValidator : AbstractValidator<CreateReviewDto>
     {
@@ -80,12 +180,61 @@ public record CreateReviewDto(string Title, string Content)
             RuleFor(x => x.Content).NotEmpty().Length(5, 800);
         }
     }
-};
-public record UpdateReviewDto(string Title, string Content);
 
-public record CommentDto(int Id, string Text,DateTimeOffset CreatedAt);
-public record CreateCommentDto(string Text)
+    public CreateReviewDto(string title, string content)
+    {
+        Title = title;
+        Content = content;
+    }
+
+    /// <example>Long journey</example>
+    public string Title { get; set; }
+    /// <example>Enjoyed it</example>
+    public string Content { get; set; }
+    
+};
+public class UpdateReviewDto
 {
+    public UpdateReviewDto(string title, string content)
+    {
+        Title = title;
+        Content = content;
+    }
+
+    /// <example>Been there</example>
+    public string Title { get; set; }
+    /// <example>Really really liked it</example>
+    public string Content { get; set; }
+
+
+}
+
+public class CommentDto
+{
+    public CommentDto(int id, string text, DateTimeOffset createdAt)
+    {
+        Id = id;
+        Text = text;
+        CreatedAt = createdAt;
+    }
+    /// <example>2</example>
+    public int Id { get; set; }
+    /// <example>Good review!</example>
+    public string Text { get; set; }
+    /// <example>2024.10.10</example>
+    public DateTimeOffset CreatedAt { get; set; }
+
+}
+
+public class CreateCommentDto
+{
+    /// <example>Nice experience</example>
+    public string Text { get; set; }
+
+    public CreateCommentDto(string Text)
+    {
+        this.Text = Text;
+    }
     public class CreateCommentDtoValidator : AbstractValidator<CreateCommentDto>
     {
         public CreateCommentDtoValidator()
@@ -94,5 +243,15 @@ public record CreateCommentDto(string Text)
         }
     }
 };
-public record UpdateCommentDto(string Text);
+
+public class UpdateCommentDto
+{
+    /// <example>Very nice review</example>
+    public string Text { get; set; }
+
+    public UpdateCommentDto(string Text)
+    {
+        this.Text = Text;
+    }
+};
 

@@ -1,5 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
+using WebApp.Auth.Model;
 using WebApp.Data;
 using WebApp.Data.Entities;
 
@@ -29,9 +33,9 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Destinations");
 
-        destinationsGroups.MapPost("/destinations", async (CreateDestinationDto dto, SystemDbContext dbContext) =>
+        destinationsGroups.MapPost("/destinations", [Authorize(Roles = ForumRoles.ForumUser)] async (CreateDestinationDto dto, HttpContext httpContext, SystemDbContext dbContext) =>
         {
-            var destination = new Destination { Name = dto.Name, Content = dto.Content };
+            var destination = new Destination { Name = dto.Name, Content = dto.Content, UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)};
             dbContext.Destinations.Add(destination);
     
             await dbContext.SaveChangesAsync();
@@ -40,18 +44,24 @@ public static class Endpoints
         })
         .WithName("CreateDestinations")
         .Produces<DestinationDto>(StatusCodes.Status201Created)
-        .Produces<string>(StatusCodes.Status400BadRequest)
-        .Produces<string>(StatusCodes.Status422UnprocessableEntity)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status422UnprocessableEntity)
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Destinations");
 
-        destinationsGroups.MapPut("/destinations/{destinationID}", async (UpdateDestinationDto dto, int destinationId, SystemDbContext dbContext) =>
+        destinationsGroups.MapPut("/destinations/{destinationID}", [Authorize] async (UpdateDestinationDto dto, int destinationId, HttpContext httpContext, SystemDbContext dbContext) =>
         {
             var destination = await dbContext.Destinations.FindAsync(destinationId);
             
             if (destination == null)
             {
                 return Results.NotFound();
+            }
+
+            if (!httpContext.User.IsInRole(ForumRoles.Admin) &&
+                httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != destination.UserId)
+            {
+                return Results.Forbid();
             }
             
             destination.Content = dto.Content;
@@ -61,8 +71,8 @@ public static class Endpoints
         })
         .WithName("UpdateDestination")
         .Produces<DestinationDto>(StatusCodes.Status200OK)
-        .Produces<string>(StatusCodes.Status400BadRequest)
-        .Produces<string>(StatusCodes.Status422UnprocessableEntity)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status422UnprocessableEntity)
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Destinations");
 
@@ -126,7 +136,8 @@ public static class Endpoints
                 Rating = 0,
                 LikesCount = 0,
                 CreatedOn = DateTimeOffset.UtcNow,
-                Destination = destination
+                Destination = destination,
+                UserId = ""
             };
             
             dbContext.Reviews.Add(review);
@@ -135,8 +146,8 @@ public static class Endpoints
         })
         .WithName("CreateReview")
         .Produces<ReviewDto>(StatusCodes.Status201Created)
-        .Produces<string>(StatusCodes.Status400BadRequest)
-        .Produces<string>(StatusCodes.Status422UnprocessableEntity)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status422UnprocessableEntity)
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Reviews");
 
@@ -157,8 +168,8 @@ public static class Endpoints
         })
         .WithName("UpdateReview")
         .Produces<ReviewDto>(StatusCodes.Status200OK)
-        .Produces<string>(StatusCodes.Status400BadRequest)
-        .Produces<string>(StatusCodes.Status422UnprocessableEntity)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status422UnprocessableEntity)
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Reviews");
 
@@ -220,7 +231,8 @@ public static class Endpoints
             {
                 Text = dto.Text,
                 CreatedOn = DateTimeOffset.UtcNow,
-                Review = review
+                Review = review,
+                UserId = ""
             };
             dbContext.Comments.Add(comment);
     
@@ -230,8 +242,8 @@ public static class Endpoints
         })
         .WithName("CreateComment")
         .Produces<CommentDto>(StatusCodes.Status201Created)
-        .Produces<string>(StatusCodes.Status400BadRequest)
-        .Produces<string>(StatusCodes.Status422UnprocessableEntity)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status422UnprocessableEntity)
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Comments");
 
@@ -253,8 +265,8 @@ public static class Endpoints
         })
         .WithName("UpdateComment")
         .Produces<CommentDto>(StatusCodes.Status200OK)
-        .Produces<string>(StatusCodes.Status400BadRequest)
-        .Produces<string>(StatusCodes.Status422UnprocessableEntity)
+        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status422UnprocessableEntity)
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Comments");
 

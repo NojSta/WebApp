@@ -1,4 +1,7 @@
-﻿namespace WebApp.Data.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using WebApp.Auth.Model;
+
+namespace WebApp.Data.Entities;
 
 public class Review
 {
@@ -11,6 +14,11 @@ public class Review
     
     public Destination Destination { get; set; }
 
+    [Required]
+    public required string UserId { get; set; }
+    
+    public ForumUser User { get; set; }
+    
     public ReviewDto ToDto()
     {
         return new ReviewDto(Id, Title, Content, Rating, LikesCount, CreatedOn);

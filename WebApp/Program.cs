@@ -29,6 +29,15 @@ builder.Services.AddFluentValidationAutoValidation(configuration =>
 builder.Services.AddTransient<JwtTokenService>();
 builder.Services.AddTransient<SessionService>();
 builder.Services.AddScoped<AuthSeeder>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", 
+        builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
 
 builder.Services.AddIdentity<ForumUser, IdentityRole>()
     .AddEntityFrameworkStores<SystemDbContext>()
@@ -82,6 +91,7 @@ app.AddReviewApi();
 app.AddCommentApi();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors("AllowAll");
 
 app.Run();
 

@@ -76,13 +76,19 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Destinations");
 
-        destinationsGroups.MapDelete("/destinations/{destinationId}", async (int destinationId, SystemDbContext dbContext) =>
+        destinationsGroups.MapDelete("/destinations/{destinationId}", async (int destinationId, HttpContext httpContext, SystemDbContext dbContext) =>
         {
             var destination = await dbContext.Destinations.FindAsync(destinationId);
             
             if (destination == null)
             {
                 return Results.NotFound();
+            }
+            
+            if (!httpContext.User.IsInRole(ForumRoles.Admin) &&
+                httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != destination.UserId)
+            {
+                return Results.Forbid();
             }
             
             dbContext.Destinations.Remove(destination);
@@ -121,7 +127,7 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Reviews");
 
-        reviewsGroups.MapPost("/reviews", async (int destinationId, CreateReviewDto dto, SystemDbContext dbContext) => 
+        reviewsGroups.MapPost("/reviews", [Authorize(Roles = ForumRoles.ForumUser)] async (int destinationId, CreateReviewDto dto, HttpContext httpContext, SystemDbContext dbContext) => 
             {
             var destination = await dbContext.Destinations.FindAsync(destinationId);
             
@@ -137,7 +143,7 @@ public static class Endpoints
                 LikesCount = 0,
                 CreatedOn = DateTimeOffset.UtcNow,
                 Destination = destination,
-                UserId = ""
+                UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             };
             
             dbContext.Reviews.Add(review);
@@ -151,7 +157,7 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Reviews");
 
-        reviewsGroups.MapPut("/reviews/{reviewID}", async (int destinationId, UpdateReviewDto dto, int reviewId, SystemDbContext dbContext) =>
+        reviewsGroups.MapPut("/reviews/{reviewID}", [Authorize] async (int destinationId, UpdateReviewDto dto, int reviewId, HttpContext httpContext, SystemDbContext dbContext) =>
         {
             var review = await dbContext.Reviews
                 .FirstOrDefaultAsync(r => r.Id == reviewId && r.Destination.Id == destinationId);
@@ -159,6 +165,13 @@ public static class Endpoints
             {
                 return Results.NotFound();
             }
+            
+            if (!httpContext.User.IsInRole(ForumRoles.Admin) &&
+                httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != review.UserId)
+            {
+                return Results.Forbid();
+            }
+            
             review.Title = dto.Title;
             review.Content = dto.Content;
             dbContext.Reviews.Update(review);
@@ -173,13 +186,20 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Reviews");
 
-        reviewsGroups.MapDelete("/reviews/{reviewId}", async (int destinationId, int reviewId, SystemDbContext dbContext) =>
+        reviewsGroups.MapDelete("/reviews/{reviewId}", [Authorize] async (int destinationId, int reviewId, HttpContext httpContext, SystemDbContext dbContext) =>
         {
             var review = await dbContext.Reviews.FirstOrDefaultAsync(r => r.Id == reviewId && r.Destination.Id == destinationId);
             if (review == null)
             {
                 return Results.NotFound();
             }
+            
+            if (!httpContext.User.IsInRole(ForumRoles.Admin) &&
+                httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != review.UserId)
+            {
+                return Results.Forbid();
+            }
+            
             dbContext.Reviews.Remove(review);
             await dbContext.SaveChangesAsync();
             return TypedResults.NoContent();
@@ -216,10 +236,10 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Comments");
 
-        commentsGroups.MapPost("/comments", async (int destinationId, int reviewId, CreateCommentDto dto, SystemDbContext dbContext) =>
+        commentsGroups.MapPost("/comments", [Authorize(Roles = ForumRoles.ForumUser)] async (int destinationId, int reviewId, CreateCommentDto dto, HttpContext httpContext, SystemDbContext dbContext) =>
         {
             var review = await dbContext.Reviews
-                .Include(r => r.Destination) // Ensure destination is included
+                .Include(r => r.Destination)
                 .FirstOrDefaultAsync(r => r.Id == reviewId && r.Destination.Id == destinationId);
 
             if (review == null)
@@ -232,7 +252,7 @@ public static class Endpoints
                 Text = dto.Text,
                 CreatedOn = DateTimeOffset.UtcNow,
                 Review = review,
-                UserId = ""
+                UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
             };
             dbContext.Comments.Add(comment);
     
@@ -247,7 +267,7 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Comments");
 
-        commentsGroups.MapPut("/comments/{commentID}", async (int destinationId, int reviewId, UpdateCommentDto dto, int commentId, SystemDbContext dbContext) =>
+        commentsGroups.MapPut("/comments/{commentID}", [Authorize] async (int destinationId, int reviewId, UpdateCommentDto dto, int commentId, HttpContext httpContext, SystemDbContext dbContext) =>
         {
             var comment = await dbContext.Comments
                 .FirstOrDefaultAsync(c => c.Id == commentId && c.Review.Id == reviewId && c.Review.Destination.Id == destinationId);
@@ -255,6 +275,12 @@ public static class Endpoints
             if (comment == null)
             {
                 return Results.NotFound();
+            }
+            
+            if (!httpContext.User.IsInRole(ForumRoles.Admin) &&
+                httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != comment.UserId)
+            {
+                return Results.Forbid();
             }
             
             comment.Text = dto.Text;
@@ -270,7 +296,7 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Comments");
 
-        commentsGroups.MapDelete("/comments/{commentId}", async (int destinationId, int reviewId, int commentId, SystemDbContext dbContext) =>
+        commentsGroups.MapDelete("/comments/{commentId}", [Authorize] async (int destinationId, int reviewId, int commentId, HttpContext httpContext, SystemDbContext dbContext) =>
         {
             var comment = await dbContext.Comments
                 .FirstOrDefaultAsync(c => c.Id == commentId && c.Review.Id == reviewId && c.Review.Destination.Id == destinationId);
@@ -278,6 +304,12 @@ public static class Endpoints
             if (comment == null)
             {
                 return Results.NotFound();
+            }
+            
+            if (!httpContext.User.IsInRole(ForumRoles.Admin) &&
+                httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub) != comment.UserId)
+            {
+                return Results.Forbid();
             }
             
             dbContext.Comments.Remove(comment);

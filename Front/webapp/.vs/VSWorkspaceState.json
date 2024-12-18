@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\components",
+    "\\src\\components\\Comments",
+    "\\src\\components\\Destinations",
+    "\\src\\components\\Reviews",
+    "\\src\\components\\User",
+    "\\src\\services"
+  ],
+  "SelectedNode": "\\src\\services\\api.js",
+  "PreviewInSolutionExplorer": false
+}

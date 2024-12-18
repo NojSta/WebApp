@@ -9,6 +9,12 @@ public static class AuthEndpoints
 {
     public static void AddAuthApi(this WebApplication app)
     {
+        app.UseCors(builder =>
+            builder.WithOrigins("http://localhost:3000")  // Allow requests from localhost:3000 (your React app)
+                .AllowCredentials()                   // Allow credentials (cookies, authorization headers)
+                .AllowAnyHeader()                     // Allow any headers
+                .AllowAnyMethod());   
+        
         //registering
         app.MapPost("api/accounts", async (UserManager<ForumUser> userManager, RegisterUserDto dto) =>
         {

@@ -119,12 +119,13 @@ public class DestinationDto
 
     /// <example>Big mountain</example>
     public string Content { get; set; }
-
-    public DestinationDto(int Id, string Name, string Content)
+    public string? PhotoDataUrl { get; set; }  // Base64 data URL for the image
+    public DestinationDto(int Id, string Name, string Content, string? photoDataUrl = null)
     {
         this.Id = Id;
         this.Name = Name;
         this.Content = Content;
+        this.PhotoDataUrl = photoDataUrl;
     }
 }
 
@@ -157,20 +158,17 @@ public class UpdateDestinationDto
 
 public class ReviewDto
 {
-    /// <example>1</example>
     public int Id { get; set; }
-    /// <example>Been there</example>
     public string Name { get; set; }
-    /// <example>Really liked it</example>
     public string Content { get; set;}
-    /// <example>2</example>
     public int Likes { get; set; }
-    /// <example>2</example>
     public int Rating { get; set; }
-    /// <example>2024.10.11</example>
     public DateTimeOffset CreatedAt { get; set; }
+    public string? PhotoDataUrl { get; set; }  // Base64 data URL for the image
+    public string UserName {get; set;}
+    
 
-    public ReviewDto(int id, string name, string content, int likes, int rating, DateTimeOffset createdAt)
+    public ReviewDto(int id, string name, string content, int likes, int rating, DateTimeOffset createdAt, string userName, string? photoDataUrl = null)
     {
         this.Id = id;
         this.Name = name;
@@ -178,8 +176,10 @@ public class ReviewDto
         this.Likes = likes;
         this.Rating = rating;
         this.CreatedAt = createdAt;
+        this.PhotoDataUrl = photoDataUrl;
+        this.UserName = userName;
     }
-};
+}
 public class CreateReviewDto
 {
     public class CreateReviewDtoValidator : AbstractValidator<CreateReviewDto>
@@ -221,11 +221,12 @@ public class UpdateReviewDto
 
 public class CommentDto
 {
-    public CommentDto(int id, string text, DateTimeOffset createdAt)
+    public CommentDto(int id, string text, DateTimeOffset createdAt, string name)
     {
         Id = id;
         Text = text;
         CreatedAt = createdAt;
+        Name = name;
     }
     /// <example>2</example>
     public int Id { get; set; }
@@ -233,6 +234,7 @@ public class CommentDto
     public string Text { get; set; }
     /// <example>2024.10.10</example>
     public DateTimeOffset CreatedAt { get; set; }
+    public string Name { get; set; }
 
 }
 
@@ -240,10 +242,12 @@ public class CreateCommentDto
 {
     /// <example>Nice experience</example>
     public string Text { get; set; }
+    public string Name { get; set; }
 
-    public CreateCommentDto(string Text)
+    public CreateCommentDto(string Text, string Name)
     {
         this.Text = Text;
+        this.Name = Name;
     }
     public class CreateCommentDtoValidator : AbstractValidator<CreateCommentDto>
     {

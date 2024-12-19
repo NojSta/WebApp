@@ -1,0 +1,113 @@
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border-radius: 8px;
+  }
+  
+  .popup-content {
+    padding: 20px;
+    position: relative;
+  }
+  
+  .popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .popup .photo-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .popup .photo-preview img {
+    margin-top: 10px;
+    border-radius: 8px;
+    max-width: 100%;
+  }
+  
+  .popup button {
+    margin-top: 15px;
+  }
+  .destinations {
+    padding: 20px;
+  }
+  
+  .destinations h1 {
+    text-align: center;
+  }
+
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: 20px;
+  }
+  
+  .destination-box {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .destination-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  .destination-name:hover {
+    color: #007BFF;
+  }
+  
+  .destination-image img.photo {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    border-radius: 4px;
+    object-fit: cover;
+  }
+  
+  .delete-button {
+    margin-top: 8px;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .delete-button:hover {
+    background-color: #ff7875;
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .center-button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+  

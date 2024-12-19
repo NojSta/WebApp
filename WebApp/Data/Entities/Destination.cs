@@ -9,6 +9,9 @@ public class Destination
     public required string Name { get; set; }
     public required string Content { get; set; }
 
+    public byte[]? PhotoData { get; set; }  // Store the actual image bytes
+    public string? PhotoContentType { get; set; }
+    
     [Required]
     public required string UserId { get; set; }
     
@@ -16,6 +19,11 @@ public class Destination
     
     public DestinationDto ToDto()
     {
-        return new DestinationDto(Id, Name, Content);
+        string? photoBase64 = null;
+        if (PhotoData != null)
+        {
+            photoBase64 = $"data:{PhotoContentType};base64,{Convert.ToBase64String(PhotoData)}";
+        }
+        return new DestinationDto(Id, Name, Content, photoBase64);
     }
 }

@@ -5,20 +5,13 @@
 namespace WebApp.Migrations
 {
     /// <inheritdoc />
-    public partial class Updated1 : Migration
+    public partial class Newwwwww : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "LikesCount",
-                table: "Reviews",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
             migrationBuilder.AddColumn<string>(
-                name: "Title",
+                name: "userName",
                 table: "Reviews",
                 type: "text",
                 nullable: false,
@@ -29,11 +22,7 @@ namespace WebApp.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "LikesCount",
-                table: "Reviews");
-
-            migrationBuilder.DropColumn(
-                name: "Title",
+                name: "userName",
                 table: "Reviews");
         }
     }

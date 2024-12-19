@@ -33,11 +33,46 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Destinations");
 
-        destinationsGroups.MapPost("/destinations", [Authorize(Roles = ForumRoles.ForumUser)] async (CreateDestinationDto dto, HttpContext httpContext, SystemDbContext dbContext) =>
+        destinationsGroups.MapPost("/destinations", [Authorize(Roles = ForumRoles.ForumUser)] async (HttpContext httpContext, SystemDbContext dbContext) =>
         {
-            var destination = new Destination { Name = dto.Name, Content = dto.Content, UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)};
+            var form = await httpContext.Request.ReadFormAsync();
+            var name = form["Name"].ToString();
+            var content = form["Content"].ToString();
+            var photo = form.Files.GetFile("Photo");
+
+            byte[]? photoData = null;
+            string? photoContentType = null;
+
+            if (photo != null)
+            {
+                if (photo.Length > 5 * 1024 * 1024)
+                {
+                    return Results.BadRequest("File size exceeds 5MB limit.");
+                }
+
+                if (!photo.ContentType.StartsWith("image/"))
+                {
+                    return Results.BadRequest("Only image files are allowed.");
+                }
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    await photo.CopyToAsync(memoryStream);
+                    photoData = memoryStream.ToArray();
+                    photoContentType = photo.ContentType;
+                }
+            }
+
+            var destination = new Destination
+            {
+                Name = name,
+                Content = content,
+                UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub),
+                PhotoData = photoData,
+                PhotoContentType = photoContentType
+            };
+
             dbContext.Destinations.Add(destination);
-    
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Created($"api/destinations/{destination.Id}", destination.ToDto());
@@ -127,27 +162,69 @@ public static class Endpoints
         .Produces(StatusCodes.Status404NotFound)
         .WithTags("Reviews");
 
-        reviewsGroups.MapPost("/reviews", [Authorize(Roles = ForumRoles.ForumUser)] async (int destinationId, CreateReviewDto dto, HttpContext httpContext, SystemDbContext dbContext) => 
-            {
+        reviewsGroups.MapPost("/reviews", [Authorize(Roles = ForumRoles.ForumUser)] async (int destinationId, HttpContext httpContext, SystemDbContext dbContext) => 
+        {
             var destination = await dbContext.Destinations.FindAsync(destinationId);
-            
+    
             if (destination == null)
             {
                 return Results.NotFound();
             }
+
+            var form = await httpContext.Request.ReadFormAsync();
+            var title = form["Title"].ToString();
+            var content = form["Content"].ToString();
+            var userName = form["Username"].ToString();
+            var photo = form.Files.GetFile("Photo");
+
+            var ratingString = form["Rating"].ToString(); 
+
+            int rating;
+            if (!int.TryParse(ratingString, out rating))
+            {
+                rating = 1; 
+            }
+            
+            byte[]? photoData = null;
+            string? photoContentType = null;
+
+            if (photo != null)
+            {
+                if (photo.Length > 5 * 1024 * 1024)
+                {
+                    return Results.BadRequest("File size exceeds 5MB limit.");
+                }
+
+                if (!photo.ContentType.StartsWith("image/"))
+                {
+                    return Results.BadRequest("Only image files are allowed.");
+                }
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    await photo.CopyToAsync(memoryStream);
+                    photoData = memoryStream.ToArray();
+                    photoContentType = photo.ContentType;
+                }
+            }
+
             var review = new Review
             {
-                Title = dto.Title,
-                Content = dto.Content,
-                Rating = 0,
+                Title = title,
+                Content = content,
+                Rating = rating,
                 LikesCount = 0,
                 CreatedOn = DateTimeOffset.UtcNow,
                 Destination = destination,
-                UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                userName = userName,
+                UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub),
+                PhotoData = photoData,
+                PhotoContentType = photoContentType,
             };
-            
+    
             dbContext.Reviews.Add(review);
             await dbContext.SaveChangesAsync();
+
             return TypedResults.Created($"api/destinations/{destinationId}/reviews/{review.Id}", review.ToDto());
         })
         .WithName("CreateReview")
@@ -250,6 +327,7 @@ public static class Endpoints
             var comment = new Comment
             {
                 Text = dto.Text,
+                Name = dto.Name,
                 CreatedOn = DateTimeOffset.UtcNow,
                 Review = review,
                 UserId = httpContext.User.FindFirstValue(JwtRegisteredClaimNames.Sub)

@@ -229,6 +229,10 @@ namespace WebApp.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("ReviewId")
                         .HasColumnType("integer");
 
@@ -265,6 +269,12 @@ namespace WebApp.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PhotoContentType")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("PhotoData")
+                        .HasColumnType("bytea");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -297,6 +307,12 @@ namespace WebApp.Migrations
                     b.Property<int>("LikesCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("PhotoContentType")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("PhotoData")
+                        .HasColumnType("bytea");
+
                     b.Property<int>("Rating")
                         .HasColumnType("integer");
 
@@ -305,6 +321,10 @@ namespace WebApp.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("userName")
                         .IsRequired()
                         .HasColumnType("text");
 

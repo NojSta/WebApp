@@ -15,9 +15,10 @@ public class Comment
     public required string UserId { get; set; }
     
     public ForumUser User { get; set; }
+    public required string Name { get; set; }
     
     public CommentDto ToDto()
     {
-        return new CommentDto(Id, Text, CreatedOn);
+        return new CommentDto(Id, Text, CreatedOn, Name);
     }
 }

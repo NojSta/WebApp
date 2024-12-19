@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../services/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterForm = () => {
-  const { login } = useAuth(); // Use the login method from context to log the user in after registration
+  const { login } = useAuth();
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError(''); // Clear any previous errors
+    setError('');
 
     try {
-      // Send registration data to the backend
       const response = await fetch('http://localhost:5092/api/accounts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -21,10 +22,13 @@ const RegisterForm = () => {
       });
 
       if (response.ok) {
-        // If registration is successful, log the user in immediately
-        await login(userName, password);
+        const success = await login(userName, password);
+        if (success) {
+          navigate('/');
+        } else {
+          setError('Login failed after registration');
+        }
       } else {
-        // Handle registration error (for example, if the username already exists)
         const data = await response.json();
         setError(data?.message || 'Registration failed');
       }

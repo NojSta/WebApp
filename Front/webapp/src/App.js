@@ -14,8 +14,8 @@ const App = () => {
       <Router>
         <Toolbar />
         <Routes>
-          <Route path="/" element={<Destinations />} />
-          <Route path="/destinations/:destinationId" element={<Reviews Comments/>} />
+        <Route path="/" element={<Destinations />} />
+          <Route path="/destinations/:destinationId" element={<Reviews/>} />
           <Route path="/destinations/:destinationId/reviews/:reviewId" element={<Comments />} />
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />

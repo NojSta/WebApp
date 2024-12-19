@@ -1,0 +1,19 @@
+.review-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .review-photo {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+  .message{
+    text-align: center;
+  }
+  .review-username {
+    font-weight: bold;
+    text-align: left;
+  }

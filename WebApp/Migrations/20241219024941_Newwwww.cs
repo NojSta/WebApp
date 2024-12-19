@@ -5,18 +5,25 @@
 namespace WebApp.Migrations
 {
     /// <inheritdoc />
-    public partial class Updated2 : Migration
+    public partial class Newwwww : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.AddColumn<string>(
+                name: "Name",
+                table: "Comments",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.DropColumn(
+                name: "Name",
+                table: "Comments");
         }
     }
 }

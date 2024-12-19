@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { useAuth } from './AuthContext';
 const API_BASE_URL = 'http://localhost:5092/api';
 
 // Fetch all destinations
@@ -12,20 +11,66 @@ export const fetchDestinations = () => {
     return axios.get(`${API_BASE_URL}/destinations/${destinationId}`).then(response => response.data);
   };
   
-  // Create a new destination
-  export const createDestination = (destinationData) => {
-    return axios.post(`${API_BASE_URL}/destinations`, destinationData).then(response => response.data);
+  // Create a destination
+  export const createDestination = (destinationData, accessToken) => {
+    if (!accessToken) {
+      throw new Error("User is not authenticated");
+    }
+  
+    return axios
+      .post(`${API_BASE_URL}/destinations`, destinationData, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'multipart/form-data', // Required for file uploads
+        },
+      })
+      .then(response => response.data)
+      .catch(error => {
+        console.error("Error creating destination:", error);
+        throw error;
+      });
   };
   
-  // Update a destination
-  export const updateDestination = (destinationId, updatedData) => {
-    return axios.put(`${API_BASE_URL}/destinations/${destinationId}`, updatedData).then(response => response.data);
-  };
   
-  // Delete a destination
-  export const deleteDestination = (destinationId) => {
-    return axios.delete(`${API_BASE_URL}/destinations/${destinationId}`).then(response => response.data);
-  };
+
+// Update a destination
+export const updateDestination = (destinationId, updatedData, accessToken) => {
+  if (!accessToken) {
+    throw new Error("User is not authenticated");
+  }
+
+  return axios
+    .put(`${API_BASE_URL}/destinations/${destinationId}`, updatedData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .then(response => response.data)
+    .catch(error => {
+      console.error("Error updating destination:", error);
+      throw error;
+    });
+};
+
+// Delete a destination
+export const deleteDestination = (destinationId, accessToken) => {
+  if (!accessToken) {
+    throw new Error("User is not authenticated");
+  }
+
+  return axios
+    .delete(`${API_BASE_URL}/destinations/${destinationId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .then(response => response.data)
+    .catch(error => {
+      console.error("Error deleting destination:", error);
+      throw error;
+    });
+};
+
   
   // Fetch reviews for a destination
 export const fetchReviews = (destinationId) => {
@@ -38,20 +83,19 @@ export const fetchReviews = (destinationId) => {
   };
   
   // Create a new review for a destination
-  export const createReview = (destinationId, reviewData, accessToken) => {
-    console.log('Access Token in createReview:', accessToken); // Log the access token
+  export const createReview = (destinationId, formData, accessToken) => {
+    console.log('Access Token in createReview:', accessToken);
   
     if (!accessToken) {
       throw new Error("User is not authenticated");
     }
-  
     return axios
       .post(
         `${API_BASE_URL}/destinations/${destinationId}/reviews`,
-        reviewData,
+        formData,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            'Authorization': `Bearer ${accessToken}`,
           },
         }
       )
@@ -62,15 +106,44 @@ export const fetchReviews = (destinationId) => {
       });
   };
   
-  // Update a review for a destination
-  export const updateReview = (destinationId, reviewId, updatedData) => {
-    return axios.put(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}`, updatedData).then(response => response.data);
-  };
-  
-  // Delete a review for a destination
-  export const deleteReview = (destinationId, reviewId) => {
-    return axios.delete(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}`).then(response => response.data);
-  };
+  // Update a review
+export const updateReview = (destinationId, reviewId, updatedData, accessToken) => {
+  if (!accessToken) {
+    throw new Error("User is not authenticated");
+  }
+
+  return axios
+    .put(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}`, updatedData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .then(response => response.data)
+    .catch(error => {
+      console.error("Error updating review:", error);
+      throw error;
+    });
+};
+
+// Delete a review for a destination
+export const deleteReview = (destinationId, reviewId, accessToken) => {
+  if (!accessToken) {
+    throw new Error("User is not authenticated");
+  }
+
+  return axios
+    .delete(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .then(response => response.data)
+    .catch(error => {
+      console.error("Error deleting review:", error);
+      throw error;
+    });
+};
+
   
   // Fetch comments for a review
 export const fetchComments = (destinationId, reviewId) => {
@@ -82,18 +155,61 @@ export const fetchComments = (destinationId, reviewId) => {
     return axios.get(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}/comments/${commentId}`).then(response => response.data);
   };
   
-  // Create a new comment for a review
-  export const createComment = (destinationId, reviewId, commentData) => {
-    return axios.post(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}/comments`, commentData).then(response => response.data);
-  };
-  
-  // Update a comment for a review
-  export const updateComment = (destinationId, reviewId, commentId, updatedData) => {
-    return axios.put(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}/comments/${commentId}`, updatedData).then(response => response.data);
-  };
-  
-  // Delete a comment for a review
-  export const deleteComment = (destinationId, reviewId, commentId) => {
-    return axios.delete(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}/comments/${commentId}`).then(response => response.data);
-  };
+  // Create a comment for a review
+export const createComment = (destinationId, reviewId, commentData, accessToken) => {
+  if (!accessToken) {
+    throw new Error("User is not authenticated");
+  }
+
+  return axios
+    .post(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}/comments`, commentData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .then(response => response.data)
+    .catch(error => {
+      console.error("Error creating comment:", error);
+      throw error;
+    });
+};
+
+// Update a comment for a review
+export const updateComment = (destinationId, reviewId, commentId, updatedData, accessToken) => {
+  if (!accessToken) {
+    throw new Error("User is not authenticated");
+  }
+
+  return axios
+    .put(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}/comments/${commentId}`, updatedData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .then(response => response.data)
+    .catch(error => {
+      console.error("Error updating comment:", error);
+      throw error;
+    });
+};
+
+// Delete a comment for a review
+export const deleteComment = (destinationId, reviewId, commentId, accessToken) => {
+  if (!accessToken) {
+    throw new Error("User is not authenticated");
+  }
+
+  return axios
+    .delete(`${API_BASE_URL}/destinations/${destinationId}/reviews/${reviewId}/comments/${commentId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .then(response => response.data)
+    .catch(error => {
+      console.error("Error deleting comment:", error);
+      throw error;
+    });
+};
+
   
